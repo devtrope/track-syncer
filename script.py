@@ -3,12 +3,21 @@ import os
 from dotenv import load_dotenv
 import time
 import hashlib
+from flask import Flask, jsonify
 
 load_dotenv()
 
 API_URL = os.getenv('TRACKBOX_API_URL')
 FOLDER_PATH = os.getenv('TRACKBOX_FOLDER_PATH')
 ACCEPTED_EXTENSIONS = ['.mp3', '.wav']
+
+app = Flask(__name__)
+
+@app.route('/sync', methods=['GET'])
+def sync_files():
+    return "Does it work?"
+
+app.run(port=5001)
 
 def compute_file_hash(file_path):
     hash_sha256 = hashlib.sha256()
