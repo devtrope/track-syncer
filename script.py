@@ -24,7 +24,7 @@ if not os.path.exists(FOLDER_PATH):
 
 for (root, dirs, files) in os.walk(FOLDER_PATH):
     for file in files:
-        if not any(file.endswith(ext) for ext in ACCEPTED_EXTENSIONS):
+        if not any(file.lower().endswith(ext) for ext in ACCEPTED_EXTENSIONS):
             continue
 
         absolute_path = os.path.join(root, file)
