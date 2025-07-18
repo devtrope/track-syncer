@@ -11,6 +11,9 @@ ACCEPTED_EXTENSIONS = ['.mp3', '.wav']
 
 files_infos = []
 
+if not os.path.exists(FOLDER_PATH):
+    raise Exception(f"Folder {FOLDER_PATH} does not exist.")
+
 for (root, dirs, files) in os.walk(FOLDER_PATH):
     for file in files:
         if not any(file.endswith(ext) for ext in ACCEPTED_EXTENSIONS):
