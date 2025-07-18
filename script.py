@@ -9,6 +9,8 @@ API_URL = os.getenv('TRACKBOX_API_URL')
 FOLDER_PATH = os.getenv('TRACKBOX_FOLDER_PATH')
 ACCEPTED_EXTENSIONS = ['.mp3', '.wav']
 
+files_infos = []
+
 for (root, dirs, files) in os.walk(FOLDER_PATH):
     for file in files:
         if not any(file.endswith(ext) for ext in ACCEPTED_EXTENSIONS):
@@ -25,7 +27,9 @@ for (root, dirs, files) in os.walk(FOLDER_PATH):
             'modified_iso': time.strftime('%Y-%m-%dT%H:%M:%S', time.localtime(stat.st_mtime)),  # ISO forma
         }
 
-        print(file_info)
+        files_infos.append(file_info)
+
+print(files_infos)
 
 message = 'This is a test message.'
 response = requests.post(
