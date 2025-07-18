@@ -1,4 +1,8 @@
 import requests
 
-response = requests.get('http://localhost:8084/index.php')
+message = 'This is a test message.'
+response = requests.post(
+    'http://localhost:8084/index.php',
+    json={'message': message}
+)
 print(response.json())
