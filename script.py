@@ -13,11 +13,14 @@ ACCEPTED_EXTENSIONS = ['.mp3', '.wav']
 
 app = Flask(__name__)
 
-@app.route('/sync', methods=['GET'])
+@app.route('/sync', methods=['POST'])
 def sync_files():
-    return "Does it work?"
+    if not os.path.exists(FOLDER_PATH):
+        return jsonify({'success': False, 'message': f'Folder {FOLDER_PATH} does not exist.'}), 404
+    return jsonify({'success': True, 'message': 'Does it work ?'}), 404
 
-app.run(port=5001)
+if __name__ == '__main__':
+    app.run(port=5001, debug=True)
 
 def compute_file_hash(file_path):
     hash_sha256 = hashlib.sha256()
@@ -27,9 +30,6 @@ def compute_file_hash(file_path):
     return hash_sha256.hexdigest()
 
 files_infos = []
-
-if not os.path.exists(FOLDER_PATH):
-    raise Exception(f"Folder {FOLDER_PATH} does not exist.")
 
 for (root, dirs, files) in os.walk(FOLDER_PATH):
     for file in files:
