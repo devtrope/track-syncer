@@ -6,9 +6,13 @@ load_dotenv()
 
 API_URL = os.getenv('TRACKBOX_API_URL')
 FOLDER_PATH = os.getenv('TRACKBOX_FOLDER_PATH')
+ACCEPTED_EXTENSIONS = ['.mp3', '.wav']
 
 for (root, dirs, files) in os.walk(FOLDER_PATH):
     for file in files:
+        if not any(file.endswith(ext) for ext in ACCEPTED_EXTENSIONS):
+            continue
+        
         absolute_path = os.path.join(root, file)
         relative_path = os.path.relpath(absolute_path, FOLDER_PATH)
         print(f'File: {relative_path}')
