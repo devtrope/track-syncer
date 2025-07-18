@@ -1,6 +1,7 @@
 import requests
 import os
 from dotenv import load_dotenv
+import time
 
 load_dotenv()
 
@@ -12,15 +13,19 @@ for (root, dirs, files) in os.walk(FOLDER_PATH):
     for file in files:
         if not any(file.endswith(ext) for ext in ACCEPTED_EXTENSIONS):
             continue
-        
+
         absolute_path = os.path.join(root, file)
         relative_path = os.path.relpath(absolute_path, FOLDER_PATH)
-        print(f'File: {relative_path}')
+        stat = os.stat(absolute_path)
 
-files = os.listdir(FOLDER_PATH)
-for file in files:
-    info = os.stat(os.path.join(FOLDER_PATH, file))
-    #print(info)
+        file_info = {
+            'path': relative_path,
+            'size_bytes': stat.st_size,
+            'modified_ts': stat.st_mtime,
+            'modified_iso': time.strftime('%Y-%m-%dT%H:%M:%S', time.localtime(stat.st_mtime)),  # ISO forma
+        }
+
+        print(file_info)
 
 message = 'This is a test message.'
 response = requests.post(
