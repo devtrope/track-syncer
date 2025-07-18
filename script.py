@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 import time
 import hashlib
 from flask import Flask, jsonify
+import zipfile
+import tempfile
 
 load_dotenv()
 
@@ -20,13 +22,31 @@ def compute_file_hash(file_path):
             hash_sha256.update(chunk)
     return hash_sha256.hexdigest()
 
-def updload_file(file_info):
+def upload_file_in_chunks(file_info, chunk_size=1024 * 1024):
     file_path = os.path.join(FOLDER_PATH, file_info['path'])
+    file_size = os.path.getsize(file_path)
+    total_chunks = (file_size + chunk_size - 1) // chunk_size 
+    filename = os.path.basename(file_info['path'])
+
     with open(file_path, 'rb') as f:
-        files = {'file': (os.path.basename(file_path), f)}
-        data = {'path': file_info['path']}
-        response = requests.post(API_URL + '/upload.php', files=files, data=data)
-        return response.status_code, response.json()
+        for chunk_index in range(total_chunks):
+            chunk_data = f.read(chunk_size)
+
+            files = {
+                'chunk': (f'{filename}.part{chunk_index}', chunk_data),
+            }
+            data = {
+                'filename': filename,
+                'chunk_index': chunk_index,
+                'total_chunks': total_chunks,
+            }
+
+            response = requests.post(API_URL + '/upload.php', files=files, data=data)
+
+            if response.status_code != 200:
+                raise Exception(f"Failed to upload chunk {chunk_index} for {file_info['path']}: {response.text}")
+    
+    return 200, {"message": f"{filename} uploaded in {total_chunks} chunks."}
 
 def get_files_list():
     files_infos = []
@@ -54,14 +74,26 @@ def get_files_list():
 
 @app.route('/sync', methods=['POST'])
 def sync_files():
+    print(">>> /sync endpoint hit")
+
     if not os.path.exists(FOLDER_PATH):
         return jsonify({'success': False, 'message': f'Folder {FOLDER_PATH} does not exist.'}), 404
-    uploaded = []
-
-    for file_info in get_files_list():
-        status_code, response = updload_file(file_info)
-        uploaded.append({'path': file_info['path'], 'status': status_code, 'response': response})
     
+    uploaded = []
+    files = get_files_list()
+    print(f">>> Found {len(files)} file(s) to upload")
+
+    for file_info in files:
+        print(f">>> Uploading {file_info['path']}")
+        try:
+            status_code, response = upload_file_in_chunks(file_info)
+            uploaded.append({'path': file_info['path'], 'status': status_code, 'response': response})
+            print(f">>> Done: {file_info['path']} - {status_code}")
+        except Exception as e:
+            print(f">>> Error uploading {file_info['path']}: {e}")
+            uploaded.append({'path': file_info['path'], 'status': 'error', 'response': str(e)})
+    
+    print(">>> Sync completed")
     return jsonify({'success': True, 'uploaded': uploaded})
 
 if __name__ == '__main__':
