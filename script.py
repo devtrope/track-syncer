@@ -4,6 +4,7 @@ import os
 from requests.exceptions import RequestException
 from dotenv import load_dotenv
 from flask import Flask, jsonify
+from flask_cors import CORS
 from utils import compute_file_hash, get_files_list, upload_file_in_chunks
 
 load_dotenv()
@@ -13,6 +14,7 @@ FOLDER_PATH = os.getenv('TRACKBOX_FOLDER_PATH')
 ACCEPTED_EXTENSIONS = ['.mp3', '.wav']
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/sync')
 def sync_files() -> jsonify:
