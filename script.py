@@ -16,7 +16,7 @@ ACCEPTED_EXTENSIONS = ['.mp3', '.wav']
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/sync')
+@app.route('/sync', methods=['POST'])
 def sync_files() -> jsonify:
     """Sync files from the specified folder to the remote server in chunks."""
     if not os.path.exists(FOLDER_PATH):
