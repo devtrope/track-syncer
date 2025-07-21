@@ -52,7 +52,7 @@ def upload_file_in_chunks(file_info: dict, folder_path: str, api_url: str, chunk
                 'hash': file_info['hash'],
             }
 
-            response = requests.post(api_url + '/upload.php', files=files, data=data, timeout=120)
+            response = requests.post(api_url + '/upload', files=files, data=data, timeout=120)
 
             if response.status_code != 200:
                 raise requests.HTTPError(
